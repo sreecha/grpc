@@ -38,14 +38,13 @@ def main():
               'name': 'bad_ssl_test_server',
               'build': 'private',
               'language': 'c',
-              'src': ['test/core/bad_ssl/server_common.c'],
+              'src': ['test/core/bad_ssl/server_common.cc'],
               'headers': ['test/core/bad_ssl/server_common.h'],
               'vs_proj_dir': 'test',
               'platforms': ['linux', 'posix', 'mac'],
               'deps': [
                   'grpc_test_util',
                   'grpc',
-                  'gpr_test_util',
                   'gpr'
               ]
           }
@@ -56,14 +55,13 @@ def main():
               'build': 'test',
               'language': 'c',
               'run': False,
-              'src': ['test/core/bad_ssl/servers/%s.c' % t],
+              'src': ['test/core/bad_ssl/servers/%s.cc' % t],
               'vs_proj_dir': 'test/bad_ssl',
               'platforms': ['linux', 'posix', 'mac'],
               'deps': [
                   'bad_ssl_test_server',
                   'grpc_test_util',
                   'grpc',
-                  'gpr_test_util',
                   'gpr'
               ]
           }
@@ -73,13 +71,12 @@ def main():
               'cpu_cost': BAD_CLIENT_TESTS[t].cpu_cost,
               'build': 'test',
               'language': 'c',
-              'src': ['test/core/bad_ssl/bad_ssl_test.c'],
+              'src': ['test/core/bad_ssl/bad_ssl_test.cc'],
               'vs_proj_dir': 'test',
               'platforms': ['linux', 'posix', 'mac'],
               'deps': [
                   'grpc_test_util',
                   'grpc',
-                  'gpr_test_util',
                   'gpr'
               ]
           }

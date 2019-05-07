@@ -21,61 +21,57 @@ licenses(["notice"])  # Apache v2
 load("//test/core/util:grpc_fuzzer.bzl", "grpc_fuzzer")
 
 grpc_cc_binary(
-    name = "client",
+    name = "fling_client",
     testonly = 1,
-    srcs = ["client.c"],
-    language = "C",
+    srcs = ["client.cc"],
+    language = "C++",
     deps = [
         "//:gpr",
         "//:grpc",
         "//test/core/end2end:ssl_test_data",
-        "//test/core/util:gpr_test_util",
         "//test/core/util:grpc_test_util",
     ],
 )
 
 grpc_cc_binary(
-    name = "server",
+    name = "fling_server",
     testonly = 1,
-    srcs = ["server.c"],
-    language = "C",
+    srcs = ["server.cc"],
+    language = "C++",
     deps = [
         "//:gpr",
         "//:grpc",
         "//test/core/end2end:ssl_test_data",
-        "//test/core/util:gpr_test_util",
         "//test/core/util:grpc_test_util",
     ],
 )
 
 grpc_cc_test(
     name = "fling",
-    srcs = ["fling_test.c"],
+    srcs = ["fling_test.cc"],
     data = [
-        ":client",
-        ":server",
+        ":fling_client",
+        ":fling_server",
     ],
     deps = [
         "//:gpr",
         "//:grpc",
         "//test/core/end2end:ssl_test_data",
-        "//test/core/util:gpr_test_util",
         "//test/core/util:grpc_test_util",
     ],
 )
 
 grpc_cc_test(
     name = "fling_stream",
-    srcs = ["fling_stream_test.c"],
+    srcs = ["fling_stream_test.cc"],
     data = [
-        ":client",
-        ":server",
+        ":fling_client",
+        ":fling_server",
     ],
     deps = [
         "//:gpr",
         "//:grpc",
         "//test/core/end2end:ssl_test_data",
-        "//test/core/util:gpr_test_util",
         "//test/core/util:grpc_test_util",
     ],
 )

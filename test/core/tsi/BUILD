@@ -16,11 +16,14 @@ load("//bazel:grpc_build_system.bzl", "grpc_cc_library", "grpc_cc_test", "grpc_c
 
 licenses(["notice"])  # Apache v2
 
-grpc_package(name = "test/core/tsi")
+grpc_package(
+    name = "test/core/tsi",
+    visibility = "public",
+)
 
 grpc_cc_library(
     name = "transport_security_test_lib",
-    srcs = ["transport_security_test_lib.c"],
+    srcs = ["transport_security_test_lib.cc"],
     hdrs = ["transport_security_test_lib.h"],
     deps = [
         "//:grpc",
@@ -30,21 +33,35 @@ grpc_cc_library(
 
 grpc_cc_test(
     name = "fake_transport_security_test",
-    srcs = ["fake_transport_security_test.c"],
-    language = "C",
+    srcs = ["fake_transport_security_test.cc"],
+    language = "C++",
     deps = [
         ":transport_security_test_lib",
-        "//:grpc",
         "//:gpr",
+        "//:grpc",
         "//:tsi",
-        "//test/core/util:gpr_test_util",
+        "//test/core/util:grpc_test_util",
     ],
 )
 
+grpc_cc_test(
+    name = "ssl_session_cache_test",
+    srcs = ["ssl_session_cache_test.cc"],
+    external_deps = [
+        "gtest",
+    ],
+    language = "C++",
+    deps = [
+        "//:gpr",
+        "//:grpc",
+        "//:tsi",
+        "//test/core/util:grpc_test_util",
+    ],
+)
 
 grpc_cc_test(
     name = "ssl_transport_security_test",
-    srcs = ["ssl_transport_security_test.c"],
+    srcs = ["ssl_transport_security_test.cc"],
     data = [
         "//src/core/tsi/test_creds:badclient.key",
         "//src/core/tsi/test_creds:badclient.pem",
@@ -58,24 +75,23 @@ grpc_cc_test(
         "//src/core/tsi/test_creds:server1.key",
         "//src/core/tsi/test_creds:server1.pem",
     ],
-    language = "C",
+    language = "C++",
     deps = [
         ":transport_security_test_lib",
-        "//:grpc",
         "//:gpr",
+        "//:grpc",
         "//:tsi",
-        "//test/core/util:gpr_test_util",
+        "//test/core/util:grpc_test_util",
     ],
 )
 
 grpc_cc_test(
     name = "transport_security_test",
-    srcs = ["transport_security_test.c"],
-    language = "C",
+    srcs = ["transport_security_test.cc"],
+    language = "C++",
     deps = [
-        "//:grpc",
         "//:gpr",
-        "//test/core/util:gpr_test_util",
+        "//:grpc",
         "//test/core/util:grpc_test_util",
     ],
 )

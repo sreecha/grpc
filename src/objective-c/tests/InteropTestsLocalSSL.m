@@ -24,7 +24,7 @@
 // in turn derived from environment variable of the same name.
 #define NSStringize_helper(x) #x
 #define NSStringize(x) @NSStringize_helper(x)
-static NSString * const kLocalSSLHost = NSStringize(HOST_PORT_LOCALSSL);
+static NSString *const kLocalSSLHost = NSStringize(HOST_PORT_LOCALSSL);
 
 // The Protocol Buffers encoding overhead of local interop server. Acquired
 // by experiment. Adjust this when server's proto file changes.
@@ -40,17 +40,33 @@ static int32_t kLocalInteropServerOverhead = 10;
   return kLocalSSLHost;
 }
 
++ (NSString *)PEMRootCertificates {
+  NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+  NSString *certsPath =
+      [bundle pathForResource:@"TestCertificates.bundle/test-certificates" ofType:@"pem"];
+  NSError *error;
+  return [NSString stringWithContentsOfFile:certsPath encoding:NSUTF8StringEncoding error:&error];
+}
+
++ (NSString *)hostNameOverride {
+  return @"foo.test.google.fr";
+}
+
 - (int32_t)encodingOverhead {
-  return kLocalInteropServerOverhead; // bytes
+  return kLocalInteropServerOverhead;  // bytes
+}
+
++ (GRPCTransportType)transportType {
+  return GRPCTransportTypeChttp2BoringSSL;
 }
 
 - (void)setUp {
   [super setUp];
 
   // Register test server certificates and name.
-  NSBundle *bundle = [NSBundle bundleForClass:self.class];
-  NSString *certsPath = [bundle pathForResource:@"TestCertificates.bundle/test-certificates"
-                                         ofType:@"pem"];
+  NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+  NSString *certsPath =
+      [bundle pathForResource:@"TestCertificates.bundle/test-certificates" ofType:@"pem"];
   [GRPCCall useTestCertsPath:certsPath testName:@"foo.test.google.fr" forHost:kLocalSSLHost];
 }
 
@@ -60,7 +76,7 @@ static int32_t kLocalInteropServerOverhead = 10;
   @try {
     [GRPCCall useTestCertsPath:nil testName:nil forHost:nil];
     XCTFail(@"Did not receive an exception when parameters are nil");
-  } @catch(NSException *theException) {
+  } @catch (NSException *theException) {
     NSLog(@"Received exception as expected: %@", theException.name);
   }
 }

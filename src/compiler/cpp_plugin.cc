@@ -33,10 +33,10 @@ class CppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
   CppGrpcGenerator() {}
   virtual ~CppGrpcGenerator() {}
 
-  virtual bool Generate(const grpc::protobuf::FileDescriptor *file,
-                        const grpc::string &parameter,
-                        grpc::protobuf::compiler::GeneratorContext *context,
-                        grpc::string *error) const {
+  virtual bool Generate(const grpc::protobuf::FileDescriptor* file,
+                        const grpc::string& parameter,
+                        grpc::protobuf::compiler::GeneratorContext* context,
+                        grpc::string* error) const {
     if (file->options().cc_generic_services()) {
       *error =
           "cpp grpc proto compiler plugin does not work with generic "
@@ -48,6 +48,7 @@ class CppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
     grpc_cpp_generator::Parameters generator_parameters;
     generator_parameters.use_system_headers = true;
     generator_parameters.generate_mock_code = false;
+    generator_parameters.include_import_headers = false;
 
     ProtoBufFile pbfile(file);
 
@@ -74,6 +75,20 @@ class CppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
         } else if (param[0] == "generate_mock_code") {
           if (param[1] == "true") {
             generator_parameters.generate_mock_code = true;
+          } else if (param[1] != "false") {
+            *error = grpc::string("Invalid parameter: ") + *parameter_string;
+            return false;
+          }
+        } else if (param[0] == "gmock_search_path") {
+          generator_parameters.gmock_search_path = param[1];
+        } else if (param[0] == "additional_header_includes") {
+          generator_parameters.additional_header_includes =
+              grpc_generator::tokenize(param[1], ":");
+        } else if (param[0] == "message_header_extension") {
+          generator_parameters.message_header_extension = param[1];
+        } else if (param[0] == "include_import_headers") {
+          if (param[1] == "true") {
+            generator_parameters.include_import_headers = true;
           } else if (param[1] != "false") {
             *error = grpc::string("Invalid parameter: ") + *parameter_string;
             return false;
@@ -125,9 +140,9 @@ class CppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
 
  private:
   // Insert the given code into the given file at the given insertion point.
-  void Insert(grpc::protobuf::compiler::GeneratorContext *context,
-              const grpc::string &filename, const grpc::string &insertion_point,
-              const grpc::string &code) const {
+  void Insert(grpc::protobuf::compiler::GeneratorContext* context,
+              const grpc::string& filename, const grpc::string& insertion_point,
+              const grpc::string& code) const {
     std::unique_ptr<grpc::protobuf::io::ZeroCopyOutputStream> output(
         context->OpenForInsert(filename, insertion_point));
     grpc::protobuf::io::CodedOutputStream coded_out(output.get());
@@ -135,7 +150,7 @@ class CppGrpcGenerator : public grpc::protobuf::compiler::CodeGenerator {
   }
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   CppGrpcGenerator generator;
   return grpc::protobuf::compiler::PluginMain(argc, argv, &generator);
 }

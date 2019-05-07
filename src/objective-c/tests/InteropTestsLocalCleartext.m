@@ -25,7 +25,7 @@
 // in turn derived from environment variable of the same name.
 #define NSStringize_helper(x) #x
 #define NSStringize(x) @NSStringize_helper(x)
-static NSString * const kLocalCleartextHost = NSStringize(HOST_PORT_LOCAL);
+static NSString *const kLocalCleartextHost = NSStringize(HOST_PORT_LOCAL);
 
 // The Protocol Buffers encoding overhead of local interop server. Acquired
 // by experiment. Adjust this when server's proto file changes.
@@ -41,8 +41,16 @@ static int32_t kLocalInteropServerOverhead = 10;
   return kLocalCleartextHost;
 }
 
++ (NSString *)PEMRootCertificates {
+  return nil;
+}
+
++ (NSString *)hostNameOverride {
+  return nil;
+}
+
 - (int32_t)encodingOverhead {
-  return kLocalInteropServerOverhead; // bytes
+  return kLocalInteropServerOverhead;  // bytes
 }
 
 - (void)setUp {
@@ -50,6 +58,10 @@ static int32_t kLocalInteropServerOverhead = 10;
 
   // Register test server as non-SSL.
   [GRPCCall useInsecureConnectionsForHost:kLocalCleartextHost];
+}
+
++ (GRPCTransportType)transportType {
+  return GRPCTransportTypeInsecure;
 }
 
 @end
