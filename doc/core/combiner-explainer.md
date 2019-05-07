@@ -114,15 +114,32 @@ if we know that it is valid to do so:
 while (q.pop(&f)) {
   f();
   if (control_can_be_returned && some_still_queued_thing_is_covered_by_poller) {
-    offload_combiner_work_to_some_other_thread();
+    queue_offload(); // Queue offload work to some other thread
   }
 }
 ```
 
-`offload` offloads to the work to an `executor` which is an internal pool of threads. 
-`offload_combiner_work_to_some_other_thread` makes one of the threads in the
-executor to pick up and continue the work on the combiner.
+`queue_offload` detaches the combiner from the current thread's executor and
+ offloads to the work to an `executor` which is an internal pool of threads.
 
+More precisely:
+
+```
+queue_offload() {
+   detach() // Detach the combiner from current thread's exec_ctx
+
+   // combiner->offload is a closure that points to the function
+   // 'offload()' (see below) and is previously initialized to run on 'executor'
+   closure_sched(&combiner->offload);
+}
+
+// Note that this function runs in the executor thread
+offload() {
+  // Attach the combiner to the current thread's (i.e executor thread's) exec_ctx
+  // This ensures that the thread's exec_ctx flush resumes the work on the combiner
+  attach();
+}
+```
 
 In principle, `run_finally` could get starved, but this hasn't
 happened in practice. If we were concerned about this, we could put a
